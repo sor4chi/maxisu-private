@@ -191,27 +191,29 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			userIds = append(userIds, comments[i].UserID)
 		}
 
-		query2 := "SELECT * FROM `users` WHERE `id` IN (?)"
-		sql, args, err := sqlx.In(query2, userIds)
-		if err != nil {
-			return nil, err
-		}
+		if len(userIds) != 0 {
+			query2 := "SELECT * FROM `users` WHERE `id` IN (?)"
+			sql, args, err := sqlx.In(query2, userIds)
+			if err != nil {
+				return nil, err
+			}
 
-		users := []User{}
-		err = db.Select(&users, sql, args...)
-		if err != nil {
-			return nil, err
-		}
+			users := []User{}
+			err = db.Select(&users, sql, args...)
+			if err != nil {
+				return nil, err
+			}
 
-		// mapに変換
-		userMap := map[int]User{}
-		for _, u := range users {
-			userMap[u.ID] = u
-		}
+			// mapに変換
+			userMap := map[int]User{}
+			for _, u := range users {
+				userMap[u.ID] = u
+			}
 
-		// ユーザーをコメントに紐付ける
-		for i := 0; i < len(comments); i++ {
-			comments[i].User = userMap[comments[i].UserID]
+			// ユーザーをコメントに紐付ける
+			for i := 0; i < len(comments); i++ {
+				comments[i].User = userMap[comments[i].UserID]
+			}
 		}
 
 		// reverse
