@@ -38,3 +38,9 @@ mysql-conf-deploy:
 	sudo cp ~/private_isu/webapp/etc/my.cnf /etc/mysql/my.cnf
 	mysqld --verbose --help > /dev/null
 	sudo systemctl restart mysql
+
+.PHONY: build-app
+build-app:
+	cd ~/private_isu/webapp/golang && make
+	sudo systemctl restart isu-go
+
