@@ -219,6 +219,21 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	return posts, nil
 }
 
+func saveImage(imgdata []byte, filename string) error {
+	f, err := os.Create("../public/image/" + filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.Write(imgdata)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func saveImages() error {
 	posts := []Post{}
 	err := db.Select(&posts, "SELECT id FROM `posts`")
@@ -251,17 +266,7 @@ func saveImages() error {
 		} else if post.Mime == "image/gif" {
 			ext = ".gif"
 		}
-		f, err := os.Create("../public/image/" + strconv.Itoa(p.ID) + ext)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-		defer f.Close()
-		_, err = f.Write(post.Imgdata)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
+		saveImage(post.Imgdata, strconv.Itoa(p.ID)+ext)
 	}
 	return nil
 }
@@ -710,6 +715,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		log.Print(err)
 		return
 	}
+	saveImage(filedata, strconv.FormatInt(pid, 10)+mime)
 
 	http.Redirect(w, r, "/posts/"+strconv.FormatInt(pid, 10), http.StatusFound)
 }
