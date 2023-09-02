@@ -221,18 +221,28 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 func saveImages() error {
 	posts := []Post{}
-	err := db.Select(&posts, "SELECT imgdata FROM `posts`")
+	err := db.Select(&posts, "SELECT id FROM `posts`")
 	if err != nil {
 		return err
 	}
 
+	if _, err := os.Stat("../public/image"); os.IsNotExist(err) {
+		os.Mkdir("../public/image", 0755)
+	}
+
 	for _, p := range posts {
+		post := Post{}
+		err := db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", p.ID)
+		if err != nil {
+			return err
+		}
+
 		log.Printf("save image: %d", p.ID)
 
 		if p.Imgdata == nil {
+			log.Print("imgdata is nil")
 			continue
 		}
-		// save image to ../public/image/{id}.{ext}
 		ext := ""
 		if p.Mime == "image/jpeg" {
 			ext = ".jpg"
@@ -243,11 +253,13 @@ func saveImages() error {
 		}
 		f, err := os.Create("../public/image/" + strconv.Itoa(p.ID) + ext)
 		if err != nil {
+			log.Print(err)
 			return err
 		}
 		defer f.Close()
 		_, err = f.Write(p.Imgdata)
 		if err != nil {
+			log.Print(err)
 			return err
 		}
 	}
