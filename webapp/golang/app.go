@@ -73,7 +73,7 @@ func init() {
 	}
 	memcacheClient := memcache.New(memdAddr)
 	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	// log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
 
 func dbInitialize() {
@@ -113,7 +113,7 @@ func digest(src string) string {
 	hash := sha512.New()
 	_, err := hash.Write([]byte(src))
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return ""
 	}
 	hashBytes := hash.Sum(nil)
@@ -242,10 +242,10 @@ func saveImages() error {
 			return err
 		}
 
-		log.Printf("save image: %d", p.ID)
+		// log.Printf("save image: %d", p.ID)
 
 		if post.Imgdata == nil {
-			log.Print("imgdata is nil")
+			// log.Print("imgdata is nil")
 			continue
 		}
 		ext := ""
@@ -394,14 +394,14 @@ func postRegister(w http.ResponseWriter, r *http.Request) {
 	query := "INSERT INTO `users` (`account_name`, `passhash`) VALUES (?,?)"
 	result, err := db.Exec(query, accountName, calculatePasshash(accountName, password))
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	session := getSession(r)
 	uid, err := result.LastInsertId()
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 	session.Values["user_id"] = uid
@@ -427,13 +427,13 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 	err := db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` ORDER BY `created_at` DESC LIMIT ?", postsPerPage+1)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -460,7 +460,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 	err := db.Get(&user, "SELECT * FROM `users` WHERE `account_name` = ? AND `del_flg` = 0", accountName)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -473,27 +473,27 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC", user.ID)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	commentCount := 0
 	err = db.Get(&commentCount, "SELECT COUNT(*) AS count FROM `comments` WHERE `user_id` = ?", user.ID)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	postIDs := []int{}
 	err = db.Select(&postIDs, "SELECT `id` FROM `posts` WHERE `user_id` = ?", user.ID)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 	postCount := len(postIDs)
@@ -514,7 +514,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 		err = db.Get(&commentedCount, "SELECT COUNT(*) AS count FROM `comments` WHERE `post_id` IN ("+placeholder+")", args...)
 		if err != nil {
-			log.Print(err)
+			// log.Print(err)
 			return
 		}
 	}
@@ -544,7 +544,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	m, err := url.ParseQuery(r.URL.RawQuery)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 	maxCreatedAt := m.Get("max_created_at")
@@ -554,20 +554,20 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 
 	t, err := time.Parse(ISO8601Format, maxCreatedAt)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	results := []Post{}
 	err = db.Select(&results, "SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC LIMIT ?", t.Format(ISO8601Format), postsPerPage+1)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	posts, err := makePosts(results, getCSRFToken(r), false)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -597,13 +597,13 @@ func getPostsID(w http.ResponseWriter, r *http.Request) {
 	results := []Post{}
 	err = db.Select(&results, "SELECT * FROM `posts` WHERE `id` = ?", pid)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	posts, err := makePosts(results, getCSRFToken(r), true)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -678,7 +678,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 
 	filedata, err := io.ReadAll(file)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -700,13 +700,13 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("body"),
 	)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
 	pid, err := result.LastInsertId()
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -729,14 +729,14 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 
 	postID, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
-		log.Print("post_idは整数のみです")
+		// log.Print("post_idは整数のみです")
 		return
 	}
 
 	query := "INSERT INTO `comments` (`post_id`, `user_id`, `comment`) VALUES (?,?,?)"
 	_, err = db.Exec(query, postID, me.ID, r.FormValue("comment"))
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -758,7 +758,7 @@ func getAdminBanned(w http.ResponseWriter, r *http.Request) {
 	users := []User{}
 	err := db.Select(&users, "SELECT * FROM `users` WHERE `authority` = 0 AND `del_flg` = 0 ORDER BY `created_at` DESC")
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -793,7 +793,7 @@ func postAdminBanned(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return
 	}
 
@@ -861,7 +861,7 @@ func main() {
 	r.Get("/image-dump", func(w http.ResponseWriter, r *http.Request) {
 		err := saveImages()
 		if err != nil {
-			log.Print(err)
+			// log.Print(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
