@@ -192,7 +192,15 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		users := map[int]User{}
-		err = db.Select(&users, "SELECT * FROM `users` WHERE `id` IN (?)", userIds)
+		query2 := "SELECT * FROM `users` WHERE `id` IN ("
+		for i := 0; i < len(userIds); i++ {
+			query2 += "?"
+			if i != len(userIds)-1 {
+				query2 += ","
+			}
+		}
+		query2 += ")"
+		err = db.Select(&users, query2, userIds)
 		if err != nil {
 			return nil, err
 		}
