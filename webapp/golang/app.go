@@ -185,10 +185,28 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			return nil, err
 		}
 
+		// ユーザーを一括で取得する
+		var userIds []int
 		for i := 0; i < len(comments); i++ {
-			err := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
-			if err != nil {
-				return nil, err
+			userIds = append(userIds, comments[i].UserID)
+		}
+
+		// ユーザークエリを実行して、結果をマップに格納する
+		users := make(map[int]User)
+		get_users_query := "SELECT * FROM `users` WHERE `id` IN (?)"
+		inClause := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(userIds)), ","), "[]")
+		get_users_query = strings.Replace(query, "(?)", "("+inClause+")", 1)
+		err = db.Select(&users, get_users_query)
+		if err != nil {
+			return nil, err
+		}
+
+		// コメントに対応するユーザーをマップから取得して設定する
+		for i := 0; i < len(comments); i++ {
+			comment := &comments[i]
+			userID := comment.UserID
+			if user, ok := users[userID]; ok {
+				comment.User = user
 			}
 		}
 
