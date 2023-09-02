@@ -15,8 +15,8 @@ rotate-slow-log:
 
 .PHONY: alp
 alp:
-	alp json -c alp-config.yml
-  
+	alp json --config alp-config.yml
+
 .PHONY: conf-deploy
 conf-deploy: nginx-conf-deploy mysql-conf-deploy
 
