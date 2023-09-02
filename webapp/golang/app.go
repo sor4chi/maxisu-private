@@ -191,12 +191,8 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			userIds = append(userIds, comments[i].UserID)
 		}
 
-		// ユーザークエリを実行して、結果をマップに格納する
-		users := make(map[int]User)
-		get_users_query := "SELECT * FROM `users` WHERE `id` IN (?)"
-		inClause := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(userIds)), ","), "[]")
-		get_users_query = strings.Replace(query, "(?)", "("+inClause+")", 1)
-		err = db.Select(&users, get_users_query)
+		users := map[int]User{}
+		err = db.Select(&users, "SELECT * FROM `users` WHERE `id` IN (?)", userIds)
 		if err != nil {
 			return nil, err
 		}
