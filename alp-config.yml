@@ -1,6 +1,7 @@
 matching_groups:
   - /posts/[0-9]+
   - /@\w+
+  - /image/*
 sort: sum
 reverse: true
 metrics:
