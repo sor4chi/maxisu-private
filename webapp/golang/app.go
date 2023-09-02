@@ -239,16 +239,16 @@ func saveImages() error {
 
 		log.Printf("save image: %d", p.ID)
 
-		if p.Imgdata == nil {
+		if post.Imgdata == nil {
 			log.Print("imgdata is nil")
 			continue
 		}
 		ext := ""
-		if p.Mime == "image/jpeg" {
+		if post.Mime == "image/jpeg" {
 			ext = ".jpg"
-		} else if p.Mime == "image/png" {
+		} else if post.Mime == "image/png" {
 			ext = ".png"
-		} else if p.Mime == "image/gif" {
+		} else if post.Mime == "image/gif" {
 			ext = ".gif"
 		}
 		f, err := os.Create("../public/image/" + strconv.Itoa(p.ID) + ext)
@@ -257,7 +257,7 @@ func saveImages() error {
 			return err
 		}
 		defer f.Close()
-		_, err = f.Write(p.Imgdata)
+		_, err = f.Write(post.Imgdata)
 		if err != nil {
 			log.Print(err)
 			return err
