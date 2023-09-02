@@ -17,6 +17,10 @@ rotate-slow-log:
 alp:
 	alp json --config alp-config.yml
 
+.PHONY: pt
+pt:
+	sudo pt-query-digest /var/log/mysql/mysql-slow.log
+
 .PHONY: conf-deploy
 conf-deploy: nginx-conf-deploy mysql-conf-deploy
 
