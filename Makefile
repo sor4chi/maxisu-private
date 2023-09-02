@@ -12,3 +12,7 @@ rotate-slow-log:
 	echo "Rotating slow log"
 	sudo mv /var/log/mysql/mysql-slow.log /var/log/mysql/mysql-slow.log.$(shell date +%Y%m%d)
 	sudo systemctl restart mysql
+
+.PHONY: alp
+alp:
+	alp json -c alp-config.yml

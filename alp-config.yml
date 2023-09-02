@@ -1,0 +1,14 @@
+matching_groups:
+  - /posts/[0-9]+
+  - /@\w+
+sort: sum
+reverse: true
+metrics:
+  - count
+  - method
+  - uri
+  - min
+  - avg
+  - max
+  - sum
+file: /var/log/nginx/access.ndjson
