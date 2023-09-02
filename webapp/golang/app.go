@@ -88,8 +88,6 @@ func dbInitialize() {
 	for _, sql := range sqls {
 		db.Exec(sql)
 	}
-
-	saveImages()
 }
 
 func tryLogin(accountName, password string) *User {
@@ -863,6 +861,14 @@ func main() {
 	r.Get("/admin/banned", getAdminBanned)
 	r.Post("/admin/banned", postAdminBanned)
 	r.Get(`/@{accountName:[a-zA-Z]+}`, getAccountName)
+	r.Get("/image-dump", func(w http.ResponseWriter, r *http.Request) {
+		err := saveImages()
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	})
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
 	})
