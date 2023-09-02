@@ -2,6 +2,7 @@ package main
 
 import (
 	crand "crypto/rand"
+	"crypto/sha512"
 	"fmt"
 	"html/template"
 	"io"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -109,22 +109,17 @@ func validateUser(accountName, password string) bool {
 		regexp.MustCompile(`\A[0-9a-zA-Z_]{6,}\z`).MatchString(password)
 }
 
-// 今回のGo実装では言語側のエスケープの仕組みが使えないのでOSコマンドインジェクション対策できない
-// 取り急ぎPHPのescapeshellarg関数を参考に自前で実装
-// cf: http://jp2.php.net/manual/ja/function.escapeshellarg.php
-func escapeshellarg(arg string) string {
-	return "'" + strings.Replace(arg, "'", "'\\''", -1) + "'"
-}
-
 func digest(src string) string {
-	// opensslのバージョンによっては (stdin)= というのがつくので取る
-	out, err := exec.Command("/bin/bash", "-c", `printf "%s" `+escapeshellarg(src)+` | openssl dgst -sha512 | sed 's/^.*= //'`).Output()
+	hash := sha512.New()
+	_, err := hash.Write([]byte(src))
 	if err != nil {
 		log.Print(err)
 		return ""
 	}
+	hashBytes := hash.Sum(nil)
+	digest := fmt.Sprintf("%x", hashBytes)
 
-	return strings.TrimSuffix(string(out), "\n")
+	return digest
 }
 
 func calculateSalt(accountName string) string {
