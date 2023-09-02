@@ -794,7 +794,7 @@ func postAdminBanned(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	defer profile.Start().Stop()
+	defer profile.Start(profile.ProfilePath("/home/isucon/private_isu/webapp/golang")).Stop()
 
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
