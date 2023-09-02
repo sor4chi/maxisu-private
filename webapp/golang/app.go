@@ -88,6 +88,8 @@ func dbInitialize() {
 	for _, sql := range sqls {
 		db.Exec(sql)
 	}
+
+	saveImages()
 }
 
 func tryLogin(accountName, password string) *User {
@@ -215,6 +217,39 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	}
 
 	return posts, nil
+}
+
+func saveImages() error {
+	posts := []Post{}
+	err := db.Select(&posts, "SELECT imgdata FROM `posts`")
+	if err != nil {
+		return err
+	}
+
+	for _, p := range posts {
+		if p.Imgdata == nil {
+			continue
+		}
+		// save image to ../public/image/{id}.{ext}
+		ext := ""
+		if p.Mime == "image/jpeg" {
+			ext = ".jpg"
+		} else if p.Mime == "image/png" {
+			ext = ".png"
+		} else if p.Mime == "image/gif" {
+			ext = ".gif"
+		}
+		f, err := os.Create("../public/image/" + strconv.Itoa(p.ID) + ext)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		_, err = f.Write(p.Imgdata)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func imageURL(p Post) string {
