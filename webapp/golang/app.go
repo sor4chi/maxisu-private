@@ -885,7 +885,6 @@ func main() {
 	r.Get("/posts", getPosts)
 	r.Get("/posts/{id}", getPostsID)
 	r.Post("/", postIndex)
-	r.Get("/image/{id}.{ext}", getImage)
 	r.Post("/comment", postComment)
 	r.Get("/admin/banned", getAdminBanned)
 	r.Post("/admin/banned", postAdminBanned)
