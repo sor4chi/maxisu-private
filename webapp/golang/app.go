@@ -227,6 +227,8 @@ func saveImages() error {
 	}
 
 	for _, p := range posts {
+		log.Printf("save image: %d", p.ID)
+
 		if p.Imgdata == nil {
 			continue
 		}
