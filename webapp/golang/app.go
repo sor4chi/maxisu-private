@@ -794,7 +794,7 @@ func postAdminBanned(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	defer profile.Start(profile.ProfilePath("/home/isucon/private_isu/webapp/golang")).Stop()
+	profile := profile.Start(profile.ProfilePath("/home/isucon/private_isu/webapp/golang"))
 
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
@@ -852,6 +852,9 @@ func main() {
 	r.Get(`/@{accountName:[a-zA-Z]+}`, getAccountName)
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
+	})
+	r.Get("/stop", func(w http.ResponseWriter, r *http.Request) {
+		profile.Stop()
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", r))
