@@ -41,6 +41,6 @@ mysql-conf-deploy:
 
 .PHONY: build-app
 build-app:
-	cd ~/private_isu/webapp/go
+	cd ~/private_isu/webapp/golang
 	make
 	cd ~/private_isu
