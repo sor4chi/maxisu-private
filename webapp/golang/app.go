@@ -170,12 +170,20 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	var posts []Post
 
 	for _, p := range results {
+		err := db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
+		if err != nil {
+			return nil, err
+		}
+		if p.User.DelFlg != 0 {
+			continue
+		}
+
 		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` ASC"
 		if !allComments {
 			query += " LIMIT 3"
 		}
 		var comments []Comment
-		err := db.Select(&comments, query, p.ID)
+		err = db.Select(&comments, query, p.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -190,16 +198,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		p.Comments = comments
 		p.CommentCount = len(comments)
 
-		err = db.Get(&p.User, "SELECT * FROM `users` WHERE `id` = ?", p.UserID)
-		if err != nil {
-			return nil, err
-		}
-
 		p.CSRFToken = csrfToken
 
-		if p.User.DelFlg == 0 {
-			posts = append(posts, p)
-		}
+		posts = append(posts, p)
 		if len(posts) >= postsPerPage {
 			break
 		}
