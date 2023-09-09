@@ -16,6 +16,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/profile"
+
 	"github.com/bradfitz/gomemcache/memcache"
 	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
 	"github.com/go-chi/chi/v5"
@@ -805,6 +807,8 @@ func postAdminBanned(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	profile := profile.Start(profile.ProfilePath("/home/isucon/private_isu/webapp/golang"))
+
 	host := os.Getenv("ISUCONP_DB_HOST")
 	if host == "" {
 		host = "localhost"
@@ -868,6 +872,9 @@ func main() {
 	})
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
+	})
+	r.Get("/stop", func(w http.ResponseWriter, r *http.Request) {
+		profile.Stop()
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", r))
